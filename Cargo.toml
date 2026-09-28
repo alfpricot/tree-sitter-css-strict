@@ -1,0 +1,27 @@
+[package]
+name = "tree-sitter-css-strict"
+description = "Strict CSS grammar for tree-sitter"
+version = "0.1.0"
+authors = ["Max Brunsfeld", "Amaan Qureshi", "M. Reifschneider"]
+license = "MIT"
+readme = "README.md"
+keywords = ["incremental", "parsing", "tree-sitter", "css"]
+categories = ["parsing", "text-editors"]
+repository = "https://github.com/meloncholera/tree-sitter-css-strict.git"
+edition = "2024"
+autoexamples = false
+
+build = "bindings/rust/build.rs"
+include = ["/LICENSE", "/NOTICE", "/README.md", "/tree-sitter.json", "/bindings/rust/*", "/grammar.js", "/queries/*", "/src/**"]
+
+[lib]
+path = "bindings/rust/lib.rs"
+
+[dependencies]
+tree-sitter-language = "0.1"
+
+[build-dependencies]
+cc = "~1.4.4"
+
+[dev-dependencies]
+tree-sitter = "~0.27.0"

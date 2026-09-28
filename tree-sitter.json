@@ -1,0 +1,46 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "css_strict",
+      "camelcase": "CSSStrict",
+      "title": "Strict CSS",
+      "scope": "source.css.strict",
+      "path": ".",
+      "file-types": [
+        "css"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
+      ],
+      "injection-regex": "^css-strict$"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Strict CSS grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Max Brunsfeld"
+      },
+      {
+        "name": "Amaan Qureshi"
+      },
+      {
+        "name": "M. Reifschneider"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/meloncholera/tree-sitter-css-strict"
+    }
+  },
+  "bindings": {
+    "c": false,
+    "go": false,
+    "node": true,
+    "python": false,
+    "rust": true,
+    "swift": false
+  }
+}

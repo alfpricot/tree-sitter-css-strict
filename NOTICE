@@ -1,0 +1,6 @@
+tree-sitter-css-strict is a fork of tree-sitter-css
+(https://github.com/tree-sitter/tree-sitter-css), copyright (c) 2018 Max Brunsfeld,
+licensed under the MIT License. See LICENSE for the full license text.
+
+The grammar, scanner, bindings, query, and test corpus derive from that project. This fork removes
+JavaScript-style line comments from CSS extras and adds support for valid unquoted relative URLs.

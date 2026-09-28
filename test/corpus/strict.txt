@@ -1,0 +1,120 @@
+=======================================
+Line comments after a rule are errors
+=======================================
+
+a {} // x
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block))
+  (ERROR
+    (UNEXPECTED 'x')))
+
+=======================================
+Line comments inside a block are errors
+=======================================
+
+a { color: red; // x }
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (plain_value))
+      (ERROR
+        (UNEXPECTED 'x')))))
+
+====================================================
+Line comments between declarations remain syntax errors
+====================================================
+
+a { color: red; // x }
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (plain_value))
+      (ERROR
+        (UNEXPECTED 'x')))))
+
+==================================================
+Protocol-relative URLs and double slashes in strings
+==================================================
+
+a {
+  src: url(//cdn.example.com/a.png);
+  content: "//";
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (string_value
+          (string_content))))))
+
+====================================
+Unquoted relative URLs are accepted
+====================================
+
+a {
+  src: url(../fonts/a.eot);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value)))))))
+
+================================
+Block comments remain comments
+================================
+
+a { /* note */ color: red; }
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (comment)
+      (declaration
+        (property_name)
+        (plain_value)))))
