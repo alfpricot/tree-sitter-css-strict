@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/meloncholera/tree-sitter-css-strict/compare/v0.1.0...v0.1.1) - 2026-10-04
+
+### Other
+
+- *(deps)* update eslint and node-gyp, track lockfile ([#4](https://github.com/meloncholera/tree-sitter-css-strict/pull/4))
+- align tooling with the shared grammar repository standard ([#3](https://github.com/meloncholera/tree-sitter-css-strict/pull/3))
+
 ## [0.1.0] - 2026-09-27
 
 ### Added
