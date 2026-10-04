@@ -1,7 +1,7 @@
 [package]
 name = "tree-sitter-css-strict"
 description = "Strict CSS grammar for tree-sitter"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Max Brunsfeld", "Amaan Qureshi", "M. Reifschneider"]
 license = "MIT"
 readme = "README.md"
