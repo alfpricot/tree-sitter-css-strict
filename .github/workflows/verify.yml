@@ -19,11 +19,8 @@
 #                      every check up into a single `Verify` status for
 #                      branch rulesets to require.
 #
-#                      workflow_dispatch exists because release-plz.yml and
-#                      sync-dev-from-main.yml push their PR branches with
-#                      GITHUB_TOKEN, which never triggers a pull_request
-#                      run; they dispatch this workflow on that branch so
-#                      the head commit still gets a `Verify` status.
+#                      workflow_dispatch lets a maintainer run the checks by
+#                      hand on any branch.
 # =============================================================================
 
 name: Verify
@@ -43,7 +40,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TREE_SITTER_CLI_VERSION: '0.27.0'
+  TREE_SITTER_CLI_VERSION: '0.27.1'
 
 jobs:
   pr-title:
@@ -165,11 +162,9 @@ jobs:
         # A bare `npm install` here would also run this package's own
         # "install": "node-gyp-build" lifecycle script and fail without
         # MSVC; --ignore-scripts installs the declared devDependencies
-        # (eslint, @eslint/js, prettier) without running any of them.
-        # ESLint's flat config resolves its own imports (@eslint/js) from
-        # this checkout's node_modules, so this step is required — an
-        # npx --package= invocation installs into a separate ephemeral
-        # cache the config file's own import can't see.
+        # (oxlint, oxfmt) without running any of them. The lint and format
+        # scripts run the locally installed binaries, so this step is
+        # required.
         run: |
           npm install --ignore-scripts
           # --ignore-scripts skips the CLI's binary download; fetch it so
