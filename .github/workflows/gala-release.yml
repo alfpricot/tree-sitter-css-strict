@@ -44,7 +44,7 @@ permissions:
   contents: read
 
 env:
-  GALA_VERSION: '0.3.0'
+  GALA_VERSION: '0.3.1'
 
 jobs:
   release:
