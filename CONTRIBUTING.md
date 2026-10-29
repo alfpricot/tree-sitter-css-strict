@@ -4,7 +4,7 @@ A tree-sitter grammar for strict CSS, with Rust and Node bindings.
 
 ## Before you start
 
-1. Branch from **`dev`**; `main` is the release branch. A promotion merge into `main` triggers `gala-release.yml`, which computes the version from Conventional Commits, updates `CHANGELOG.md` and the `Cargo.toml` version, tags the release commit, and fast-forwards `dev`; the tag then publishes through `release.yml`.
+1. Branch from **`dev`**; `main` is the release branch. A promotion merge into `main` triggers `gala-release.yml`, which computes the version from Conventional Commits, updates `CHANGELOG.md` and the version in `Cargo.toml`, `package.json`, and `tree-sitter.json`, regenerates the parser, tags the release commit, and fast-forwards `dev`; the tag then publishes through `release.yml`.
 2. Read [ARCHITECTURE.md](ARCHITECTURE.md) for how the grammar, generated parser, and bindings relate.
 
 ## Local setup
