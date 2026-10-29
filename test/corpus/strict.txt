@@ -127,7 +127,7 @@ a {
   width: calc(.5em + 2px);
   margin: max(.5rem, 1px);
   transform: scale(.5);
-  src: url(./a.png), url(.hidden/b.png);
+  src: url(./a.png), url(.5x/bg.png), url(.hidden/b.png);
 }
 
 ---
@@ -164,6 +164,10 @@ a {
             (float_value))))
       (declaration
         (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value)))
         (call_expression
           (function_name)
           (url_arguments
