@@ -91,17 +91,20 @@ bool tree_sitter_css_strict_external_scanner_scan(void *payload, TSLexer *lexer,
             lexer->result_symbol = PSEUDO_CLASS_SELECTOR_COLON;
 
             // A pseudo-class selector needs a class name immediately after the colon, so when the
-            // first non-whitespace character there cannot start one — a digit, '#', '(', a
-            // quote, ... — this colon introduces a declaration (`color: 0 auto;`) and the
-            // lookahead below, which reads the whole value looking for a `{`, cannot change
-            // the answer anymore. On the stylesheets in examples/ that skips ~55% of these
-            // scans and ~26% of the characters this scanner reads, about 4% of their parse
-            // time. Only malformed input (a value that starts this way and is followed by a
-            // `{` before any `;` or `}`) reaches the loop through a different route, and it
-            // fails to parse either way. A '/' still takes the slow path because a comment
-            // may sit between the colon and the name, and EOF keeps the error-recovery
-            // behavior documented at the bottom of this branch. The lookahead uses advance()
-            // rather than skip() so the token marked above keeps covering just the colon.
+            // first non-whitespace character there cannot start one — a digit, '#', '(', a quote,
+            // ... — this colon introduces a declaration (`color: 0 auto;`) and the lookahead
+            // below, which reads the whole value looking for a `{`, cannot turn it into a
+            // selector. On the stylesheets in examples/ that skips ~55% of these scans and ~26%
+            // of the characters this scanner reads, about 4% of their parse time.
+            //
+            // The answers it gives up are the ones where a `{` or EOF arrives before the value's
+            // `;` or `}`. The loop below would then report a pseudo-class colon and the parser
+            // would go on to fail on the class name, while this path reports a declaration colon:
+            // `color: "{"` parses as the declaration it is instead of an error, and a value left
+            // unterminated at EOF (`a: 0`) reaches the same failure through a different tree.
+            // A '/' still takes the slow path, because a comment may sit between the colon
+            // and the name. The lookahead uses advance() rather than skip() so the token
+            // marked above keeps covering just the colon.
             bool after_whitespace = iswspace(lexer->lookahead);
             while (iswspace(lexer->lookahead)) {
                 advance(lexer);
