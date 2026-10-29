@@ -70,6 +70,8 @@ export function checkVersions(root = pathToFileURL(process.cwd() + '/'), tag) {
   return version;
 }
 
+// Checks package.json and tree-sitter.json against the tag; for a legacy tag
+// (see writesVersionFiles) it writes the tag's version into both instead.
 export function prepareNpm(tag, root = pathToFileURL(process.cwd() + '/')) {
   const galaToml = new URL('.gala.toml', root);
   if (writesVersionFiles(existsSync(galaToml) ? readFileSync(galaToml, 'utf8') : '')) {
@@ -90,20 +92,27 @@ export function canAttest(tag, commit, ref, sha) {
   return Boolean(commit) && ref === `refs/tags/${tag}` && sha === commit;
 }
 
-if (process.argv[2] === 'resolve') {
-  const commit = resolveRelease(process.env.TAG);
-  const policy = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-  appendFileSync(process.env.GITHUB_OUTPUT, `commit=${commit}\npolicy=${policy}\n`);
-} else if (process.argv[2] === 'check-npm') {
-  prepareNpm(process.env.TAG);
-  const provenance = canAttest(
-    process.env.TAG,
-    process.env.RELEASE_COMMIT,
-    process.env.GITHUB_REF,
-    process.env.GITHUB_SHA,
-  );
-  appendFileSync(process.env.GITHUB_OUTPUT, `provenance=${provenance}\n`);
-} else if (process.argv[2] === 'versions') {
-  const version = checkVersions();
-  console.log(`Cargo.toml, package.json, and tree-sitter.json all carry ${version}`);
+// The publish jobs run this script from main while the workflow file comes
+// from the dispatched ref, so an older workflow can name a command this
+// version no longer has; that must fail the job, not pass it doing nothing.
+// prepare-npm is the name workflows used before check-npm.
+export function runCommand(command, env = process.env) {
+  if (command === 'resolve') {
+    const commit = resolveRelease(env.TAG);
+    const policy = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    appendFileSync(env.GITHUB_OUTPUT, `commit=${commit}\npolicy=${policy}\n`);
+  } else if (command === 'check-npm' || command === 'prepare-npm') {
+    prepareNpm(env.TAG);
+    const provenance = canAttest(env.TAG, env.RELEASE_COMMIT, env.GITHUB_REF, env.GITHUB_SHA);
+    appendFileSync(env.GITHUB_OUTPUT, `provenance=${provenance}\n`);
+  } else if (command === 'versions') {
+    const version = checkVersions();
+    console.log(`Cargo.toml, package.json, and tree-sitter.json all carry ${version}`);
+  } else {
+    throw new Error(`release-policy: unknown command ${JSON.stringify(command)}`);
+  }
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  runCommand(process.argv[2]);
 }

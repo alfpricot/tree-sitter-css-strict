@@ -11,6 +11,7 @@ import {
   prepareNpm,
   releaseVersion,
   resolveRelease,
+  runCommand,
 } from './release-policy.mjs';
 
 const writeRelease = (root, cargo, npm = cargo, treeSitter = cargo) => {
@@ -142,4 +143,9 @@ test('a tag cut before gala wrote the version files keeps publish-time versions'
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('an unknown command fails instead of passing without doing anything', () => {
+  assert.throws(() => runCommand('publish-npm', {}), /unknown command "publish-npm"/);
+  assert.throws(() => runCommand(undefined, {}), /unknown command/);
 });
