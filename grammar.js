@@ -15,7 +15,15 @@ export default grammar({
 
   externals: ($) => [$._descendant_operator, $._pseudo_class_selector_colon, $.__error_recovery],
 
-  inline: ($) => [$._top_level_item, $._block_item],
+  // `_value` is inlined so the hidden wrapper node that every property value passes
+  // through disappears from the parse table. Hidden rules never appear in the output
+  // tree, so the reduce action that builds one is pure overhead: `_value` alone accounts
+  // for ~1,200 of the ~30,000 reduce actions a 150 KB stylesheet needs, and dropping
+  // them made parsing the stylesheets in examples/ about 2% faster. `_selector` and
+  // `_query` were tried and left out — `_selector` grew the table from 450 to 629
+  // states for no measurable gain, and inlining `_query` alongside `_value` makes
+  // `parenthesized_query` conflict with `parenthesized_value`.
+  inline: ($) => [$._top_level_item, $._block_item, $._value],
 
   rules: {
     stylesheet: ($) => repeat($._top_level_item),
