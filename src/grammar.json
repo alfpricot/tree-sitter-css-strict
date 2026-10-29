@@ -2364,8 +2364,17 @@
     "_unquoted_url": {
       "type": "TOKEN",
       "content": {
-        "type": "PATTERN",
-        "value": "[./][^\\s'\\\")]+"
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "\\/[^\\s'\\\")]*"
+          },
+          {
+            "type": "PATTERN",
+            "value": "\\.([^\\s'\\\")0-9][^\\s'\\\")]*)?"
+          }
+        ]
       }
     },
     "comment": {

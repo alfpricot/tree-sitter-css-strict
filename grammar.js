@@ -347,7 +347,10 @@ export default grammar({
 
     at_keyword: (_) => /@[a-zA-Z-_]+/,
 
-    _unquoted_url: (_) => token(/[./][^\s'\")]+/),
+    // A `.` followed by a digit starts a number (`calc(.5em + 1px)`), not a
+    // relative path, so only a slash or a `.` that is not followed by a digit
+    // can open an unquoted URL.
+    _unquoted_url: (_) => token(choice(/\/[^\s'\")]*/, /\.([^\s'\")0-9][^\s'\")]*)?/)),
 
     comment: (_) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 

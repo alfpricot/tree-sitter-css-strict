@@ -118,3 +118,57 @@ a { /* note */ color: red; }
       (declaration
         (property_name)
         (plain_value)))))
+
+==============================================
+Leading-decimal numbers are not unquoted URLs
+==============================================
+
+a {
+  width: calc(.5em + 2px);
+  margin: max(.5rem, 1px);
+  transform: scale(.5);
+  src: url(./a.png), url(.hidden/b.png);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (binary_expression
+              (float_value
+                (unit))
+              (integer_value
+                (unit))))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (float_value
+              (unit))
+            (integer_value
+              (unit)))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (float_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value)))
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value)))))))
