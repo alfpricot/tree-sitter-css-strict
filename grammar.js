@@ -352,13 +352,7 @@ export default grammar({
     // (`url(.5x/bg.png)`); without one no alternative matches there and the
     // float is the only token left to take the position.
     _unquoted_url: (_) =>
-      token(
-        choice(
-          /\/[^\s'\")]*/,
-          /\.[^\s'\")0-9][^\s'\")]*/,
-          /\.\d[^\s'\")]*\/[^\s'\")]*/,
-        ),
-      ),
+      token(choice(/\/[^\s'\")]*/, /\.[^\s'\")0-9][^\s'\")]*/, /\.\d[^\s'\")]*\/[^\s'\")]*/)),
 
     comment: (_) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
