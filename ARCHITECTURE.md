@@ -44,7 +44,7 @@ Real-world CSS files that Verify parses, failing on any `ERROR` or `MISSING` nod
 
 ### [tools/](tools)
 
-Release helpers: `package-check.mjs`, `release-policy.mjs`, and its tests, used by the release workflow to check and prepare the published packages.
+Release helpers: `package-check.mjs`, `release-policy.mjs`, and its tests, used by the release workflow to check the published packages and their versions.
 
 ## External systems and data flow
 
@@ -53,7 +53,7 @@ There are no runtime services. Consumers load the language object into the `tree
 ## Build, test, release, and deploy
 
 - **Pull requests and pushes to `dev` and `main`:** `.github/workflows/verify.yml` checks the pull request title, scans for secrets, confirms the committed parser matches `tree-sitter generate`, lints and format-checks the JavaScript, runs the corpus and the `examples/` parse check, runs `cargo fmt`, `cargo clippy`, and `cargo test`, runs the Node binding tests, and lints the workflow files.
-- **Releases:** `dev` is the default branch and `main` is release-only. A push to `main` runs `gala-release.yml`, which uses gala (configured in `.gala.toml`) to compute the next version from Conventional Commits, write `CHANGELOG.md`, bump the `Cargo.toml` version, commit, tag, push `main` and the tag with a deploy key, and fast-forward `dev`. The workflow then dispatches `release.yml`, which re-verifies, builds prebuilt Node binaries and the WASM file, and publishes to crates.io, npm, and GitHub Packages before creating the GitHub Release. `package.json` and `tree-sitter.json` versions are set from the tag at publish time and never committed.
+- **Releases:** `dev` is the default branch and `main` is release-only. A push to `main` runs `gala-release.yml`, which uses gala (configured in `.gala.toml`) to compute the next version from Conventional Commits, write `CHANGELOG.md`, bump the version in `Cargo.toml`, `package.json`, and `tree-sitter.json`, refresh `package-lock.json`, regenerate the parser (whose metadata embeds the `tree-sitter.json` version), commit, tag, push `main` and the tag with a deploy key, and fast-forward `dev`. The workflow then dispatches `release.yml`, which re-verifies, builds prebuilt Node binaries and the WASM file, and publishes to crates.io, npm, and GitHub Packages before creating the GitHub Release.
 - **Maintenance:** `cache-cleanup.yml` deletes stale Actions caches daily.
 
 There is no deployed service.
