@@ -2484,7 +2484,8 @@
   ],
   "inline": [
     "_top_level_item",
-    "_block_item"
+    "_block_item",
+    "_value"
   ],
   "supertypes": [],
   "reserved": {}
