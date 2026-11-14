@@ -9,3 +9,11 @@ test('can load grammar', async () => {
     parser.setLanguage(language);
   });
 });
+
+test('loads node-types.json on first access and keeps the result', async () => {
+  const { default: language } = await import('./index.js');
+  const info = language.nodeTypeInfo;
+  assert.ok(Array.isArray(info));
+  assert.ok(info.length > 0);
+  assert.strictEqual(language.nodeTypeInfo, info);
+});

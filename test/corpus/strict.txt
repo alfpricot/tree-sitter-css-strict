@@ -176,3 +176,97 @@ a {
           (function_name)
           (url_arguments
             (plain_value)))))))
+
+==========================================================
+Block comment after a colon with no space hides its braces
+==========================================================
+
+a {
+  position:/*{*/relative;
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (comment)
+        (plain_value)))))
+
+========================================================
+Block comment after a colon and a space hides its braces
+========================================================
+
+a {
+  position: /*{*/relative;
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (comment)
+        (plain_value)))))
+
+==================================================================
+A brace inside a string after a colon and a space is a declaration
+==================================================================
+
+a {
+  color: "{";
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (string_value
+          (string_content))))))
+
+===============================================================
+A brace inside a string directly after a colon is a declaration
+===============================================================
+
+a {
+  color:"{";
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (string_value
+          (string_content))))))
+
+==========================================================
+A value left unterminated at end of input is a declaration
+==========================================================
+
+a: 0
+
+---
+
+(stylesheet
+  (declaration
+    (property_name)
+    (integer_value)
+    (MISSING ";")))
