@@ -39,14 +39,25 @@ export default grammar({
         $.keyframes_statement,
         $.supports_statement,
         $.scope_statement,
+        alias($._container_statement, $.at_rule),
         $.at_rule,
       ),
 
     // Statements
 
-    import_statement: ($) => seq('@import', $._value, sep(',', $._query), ';'),
+    // `layer(name)` and `supports(...)` may follow the imported URL before the media queries.
+    import_statement: ($) =>
+      seq('@import', $._value, repeat($.call_expression), sep(',', $._query), ';'),
 
     media_statement: ($) => seq('@media', sep1(',', $._query), $.block),
+
+    // `@container` shares the generic at-rule shape and adds an optional container name.
+    _container_statement: ($) =>
+      seq(
+        alias('@container', $.at_keyword),
+        choice(seq(alias($.identifier, $.container_name), sep1(',', $._query)), sep(',', $._query)),
+        choice(';', $.block),
+      ),
 
     charset_statement: ($) => seq('@charset', $._value, ';'),
 
@@ -107,6 +118,7 @@ export default grammar({
         $.supports_statement,
         $.scope_statement,
         $.postcss_statement,
+        alias($._container_statement, $.at_rule),
         $.at_rule,
       ),
 
@@ -183,9 +195,13 @@ export default grammar({
         optional($._selector),
         token(prec(1, '[')),
         alias(choice($.identifier, $.namespace_selector), $.attribute_name),
-        optional(seq(choice('=', '~=', '^=', '|=', '*=', '$='), $._value)),
+        optional(
+          seq(choice('=', '~=', '^=', '|=', '*=', '$='), $._value, optional($.attribute_flag)),
+        ),
         ']',
       ),
+
+    attribute_flag: (_) => /[iIsS]/,
 
     child_selector: ($) => prec.left(seq(optional($._selector), '>', $._selector)),
 
@@ -228,28 +244,29 @@ export default grammar({
     // Declarations
 
     declaration: ($) =>
-      seq(
-        alias($.identifier, $.property_name),
-        ':',
-        $._value,
-        repeat(seq(optional(','), $._value)),
-        optional($.important),
-        ';',
+      choice(
+        seq(alias($.identifier, $.property_name), ':', $._declaration_values, ';'),
+        // A custom property may hold an empty value (`--x: ;`).
+        seq($._custom_property_name, ':', optional($._declaration_values), ';'),
       ),
 
     last_declaration: ($) =>
       prec(
         1,
-        seq(
-          alias($.identifier, $.property_name),
-          ':',
-          $._value,
-          repeat(seq(optional(','), $._value)),
-          optional($.important),
+        choice(
+          seq(alias($.identifier, $.property_name), ':', $._declaration_values),
+          seq($._custom_property_name, ':', optional($._declaration_values)),
         ),
       ),
 
-    important: (_) => '!important',
+    _declaration_values: ($) =>
+      seq($._value, repeat(seq(optional(','), $._value)), optional($.important)),
+
+    _custom_property_name: ($) =>
+      alias(token(prec(1, /--[a-zA-Z0-9-_\xA0-\xFF]*/)), $.property_name),
+
+    // Case-insensitive, and the bang may be followed by whitespace (`! important`).
+    important: (_) => token(prec(1, seq('!', /\s*/, /[iI][mM][pP][oO][rR][tT][aA][nN][tT]/))),
 
     // Media queries
 
@@ -260,11 +277,34 @@ export default grammar({
         $.binary_query,
         $.unary_query,
         $.selector_query,
+        $.range_query,
         $.parenthesized_query,
       ),
 
     feature_query: ($) =>
       seq('(', alias($.identifier, $.feature_name), ':', repeat1($._value), ')'),
+
+    // Range syntax: `(width >= 600px)`, `(400px <= width < 700px)`.
+    range_query: ($) =>
+      seq(
+        '(',
+        $._range_operand,
+        $._range_operator,
+        $._range_operand,
+        optional(seq($._range_operator, $._range_operand)),
+        ')',
+      ),
+
+    _range_operand: ($) =>
+      choice(
+        alias($.identifier, $.feature_name),
+        $.integer_value,
+        $.float_value,
+        $.call_expression,
+        seq($.integer_value, '/', $.integer_value), // A ratio such as `16/9`
+      ),
+
+    _range_operator: (_) => choice('<', '<=', '>', '>=', '='),
 
     parenthesized_query: ($) => seq('(', $._query, ')'),
 

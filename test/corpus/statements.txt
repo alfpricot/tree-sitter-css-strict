@@ -368,3 +368,147 @@ Other at-statements
           (arguments
             (string_value
               (string_content))))))))
+
+===================
+Range media queries
+===================
+
+@media (width >= 600px) {}
+@media (400px <= width <= 700px) {}
+@media (width < 600px) and (height > 300px) {}
+@media (aspect-ratio >= 16/9) {}
+
+---
+
+(stylesheet
+  (media_statement
+    (range_query
+      (feature_name)
+      (integer_value
+        (unit)))
+    (block))
+  (media_statement
+    (range_query
+      (integer_value
+        (unit))
+      (feature_name)
+      (integer_value
+        (unit)))
+    (block))
+  (media_statement
+    (binary_query
+      (range_query
+        (feature_name)
+        (integer_value
+          (unit)))
+      (range_query
+        (feature_name)
+        (integer_value
+          (unit))))
+    (block))
+  (media_statement
+    (range_query
+      (feature_name)
+      (integer_value)
+      (integer_value))
+    (block)))
+
+=======================
+Named container queries
+=======================
+
+@container card (min-width: 400px) {}
+@container (min-width: 400px) {}
+@container sidebar (width > 400px) and (height < 200px) {}
+
+---
+
+(stylesheet
+  (at_rule
+    (at_keyword)
+    (container_name)
+    (feature_query
+      (feature_name)
+      (integer_value
+        (unit)))
+    (block))
+  (at_rule
+    (at_keyword)
+    (feature_query
+      (feature_name)
+      (integer_value
+        (unit)))
+    (block))
+  (at_rule
+    (at_keyword)
+    (container_name)
+    (binary_query
+      (range_query
+        (feature_name)
+        (integer_value
+          (unit)))
+      (range_query
+        (feature_name)
+        (integer_value
+          (unit))))
+    (block)))
+
+===========================================
+Imports with a layer and supports condition
+===========================================
+
+@import url(a.css) layer(base);
+@import url(a.css) layer(base) supports(display: grid);
+@import 'a.css' layer(base) supports(display: grid) screen;
+@import url(a.css) screen and (min-width: 600px);
+
+---
+
+(stylesheet
+  (import_statement
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)))
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value))))
+  (import_statement
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)))
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)))
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)
+        (plain_value))))
+  (import_statement
+    (string_value
+      (string_content))
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)))
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)
+        (plain_value)))
+    (keyword_query))
+  (import_statement
+    (call_expression
+      (function_name)
+      (arguments
+        (plain_value)))
+    (binary_query
+      (keyword_query)
+      (feature_query
+        (feature_name)
+        (integer_value
+          (unit))))))

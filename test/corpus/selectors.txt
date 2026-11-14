@@ -664,3 +664,41 @@ Escape sequences
           (escape_sequence)
           (identifier))))
     (block)))
+
+====================================
+Attribute selectors with a case flag
+====================================
+
+a[type="text" i] {}
+a[type=text s] {}
+a[href$=".PDF" I] {}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (attribute_selector
+        (tag_name)
+        (attribute_name)
+        (string_value
+          (string_content))
+        (attribute_flag)))
+    (block))
+  (rule_set
+    (selectors
+      (attribute_selector
+        (tag_name)
+        (attribute_name)
+        (plain_value)
+        (attribute_flag)))
+    (block))
+  (rule_set
+    (selectors
+      (attribute_selector
+        (tag_name)
+        (attribute_name)
+        (string_value
+          (string_content))
+        (attribute_flag)))
+    (block)))
