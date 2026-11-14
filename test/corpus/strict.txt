@@ -33,25 +33,6 @@ a { color: red; // x }
       (ERROR
         (UNEXPECTED 'x')))))
 
-====================================================
-Line comments between declarations remain syntax errors
-====================================================
-
-a { color: red; // x }
-
----
-
-(stylesheet
-  (rule_set
-    (selectors
-      (tag_name))
-    (block
-      (declaration
-        (property_name)
-        (plain_value))
-      (ERROR
-        (UNEXPECTED 'x')))))
-
 ==================================================
 Protocol-relative URLs and double slashes in strings
 ==================================================
@@ -175,4 +156,227 @@ a {
         (call_expression
           (function_name)
           (url_arguments
+            (plain_value)))))))
+
+==========================================================
+Block comment after a colon with no space hides its braces
+==========================================================
+
+a {
+  position:/*{*/relative;
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (comment)
+        (plain_value)))))
+
+========================================================
+Block comment after a colon and a space hides its braces
+========================================================
+
+a {
+  position: /*{*/relative;
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (comment)
+        (plain_value)))))
+
+==================================================================
+A brace inside a string after a colon and a space is a declaration
+==================================================================
+
+a {
+  color: "{";
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (string_value
+          (string_content))))))
+
+===============================================================
+A brace inside a string directly after a colon is a declaration
+===============================================================
+
+a {
+  color:"{";
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (string_value
+          (string_content))))))
+
+==========================================================
+A value left unterminated at end of input is a declaration
+==========================================================
+
+a: 0
+
+---
+
+(stylesheet
+  (declaration
+    (property_name)
+    (integer_value)
+    (MISSING ";")))
+
+=============================================================
+Double slashes without a space are not accepted inside values
+=============================================================
+
+a {
+  margin: 0 //old
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (binary_expression
+          (binary_expression
+            (integer_value)
+            (MISSING important))
+          (plain_value))))))
+
+===============================
+Fragment URLs are unquoted URLs
+===============================
+
+a {
+  filter: url(#clip);
+  fill: url(#a-b_c);
+  mask: url(#clip-path_1);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (url_arguments
+            (plain_value)))))))
+
+============================================
+A hex color opening a function stays a color
+============================================
+
+a {
+  background: linear-gradient(#fff, #000);
+  filter: drop-shadow(#000 0 0);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (color_value)
+            (color_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (color_value)
+            (integer_value)
+            (integer_value)))))))
+
+==============================================
+Unquoted absolute URLs keep every double slash
+==============================================
+
+a {
+  background: url(https://example.com/a//b.png);
+  src: url(file:///fonts/a.woff);
+  mask: url(data:image/png;base64,AA//AA==);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value)
+            (plain_value)
             (plain_value)))))))

@@ -38,11 +38,12 @@ declare const binding: {
   language: unknown;
 
   /**
-   * The content of the `node-types.json` file for this grammar.
+   * The content of the `node-types.json` file for this grammar, read on first access. Unset when
+   * the file is missing from the package.
    *
    * @see {@linkplain https://tree-sitter.github.io/tree-sitter/using-parsers/6-static-node-types Static Node Types}
    */
-  nodeTypeInfo: NodeInfo[];
+  nodeTypeInfo?: NodeInfo[];
 
   /** The syntax highlighting query for this grammar. */
   HIGHLIGHTS_QUERY?: string;

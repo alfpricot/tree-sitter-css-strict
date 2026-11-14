@@ -2,6 +2,7 @@ adjacent_sibling_selector
 arguments
 at_keyword
 at_rule
+attribute_flag
 attribute_name
 attribute_selector
 binary_expression
@@ -14,6 +15,7 @@ class_name
 class_selector
 color_value
 comment
+container_name
 declaration
 descendant_selector
 escape_sequence
@@ -47,6 +49,7 @@ postcss_statement
 property_name
 pseudo_class_selector
 pseudo_element_selector
+range_query
 rule_set
 scope_statement
 selector_query

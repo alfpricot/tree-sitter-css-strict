@@ -39,14 +39,25 @@ export default grammar({
         $.keyframes_statement,
         $.supports_statement,
         $.scope_statement,
+        alias($._container_statement, $.at_rule),
         $.at_rule,
       ),
 
     // Statements
 
-    import_statement: ($) => seq('@import', $._value, sep(',', $._query), ';'),
+    // `layer(name)` and `supports(...)` may follow the imported URL before the media queries.
+    import_statement: ($) =>
+      seq('@import', $._value, repeat($.call_expression), sep(',', $._query), ';'),
 
     media_statement: ($) => seq('@media', sep1(',', $._query), $.block),
+
+    // `@container` shares the generic at-rule shape and adds an optional container name.
+    _container_statement: ($) =>
+      seq(
+        alias('@container', $.at_keyword),
+        choice(seq(alias($.identifier, $.container_name), sep1(',', $._query)), sep(',', $._query)),
+        choice(';', $.block),
+      ),
 
     charset_statement: ($) => seq('@charset', $._value, ';'),
 
@@ -107,6 +118,7 @@ export default grammar({
         $.supports_statement,
         $.scope_statement,
         $.postcss_statement,
+        alias($._container_statement, $.at_rule),
         $.at_rule,
       ),
 
@@ -183,9 +195,13 @@ export default grammar({
         optional($._selector),
         token(prec(1, '[')),
         alias(choice($.identifier, $.namespace_selector), $.attribute_name),
-        optional(seq(choice('=', '~=', '^=', '|=', '*=', '$='), $._value)),
+        optional(
+          seq(choice('=', '~=', '^=', '|=', '*=', '$='), $._value, optional($.attribute_flag)),
+        ),
         ']',
       ),
+
+    attribute_flag: (_) => /[iIsS]/,
 
     child_selector: ($) => prec.left(seq(optional($._selector), '>', $._selector)),
 
@@ -219,8 +235,8 @@ export default grammar({
         ),
       ),
 
-    // An+B notation for `nth-child`/`nth-last-child`.
-    _nth_functional_notation: (_) => /-?(\d)*n\s*(\+\s*\d+)?/,
+    // An+B notation for `nth-child`/`nth-last-child`: an optional sign on A, and a signed B.
+    _nth_functional_notation: (_) => /[-+]?\d*n\s*([-+]\s*\d+)?/,
 
     pseudo_element_arguments: ($) =>
       seq(token.immediate('('), sep(',', choice($._selector, repeat1($._value))), ')'),
@@ -228,28 +244,29 @@ export default grammar({
     // Declarations
 
     declaration: ($) =>
-      seq(
-        alias($.identifier, $.property_name),
-        ':',
-        $._value,
-        repeat(seq(optional(','), $._value)),
-        optional($.important),
-        ';',
+      choice(
+        seq(alias($.identifier, $.property_name), ':', $._declaration_values, ';'),
+        // A custom property may hold an empty value (`--x: ;`).
+        seq($._custom_property_name, ':', optional($._declaration_values), ';'),
       ),
 
     last_declaration: ($) =>
       prec(
         1,
-        seq(
-          alias($.identifier, $.property_name),
-          ':',
-          $._value,
-          repeat(seq(optional(','), $._value)),
-          optional($.important),
+        choice(
+          seq(alias($.identifier, $.property_name), ':', $._declaration_values),
+          seq($._custom_property_name, ':', optional($._declaration_values)),
         ),
       ),
 
-    important: (_) => '!important',
+    _declaration_values: ($) =>
+      seq($._value, repeat(seq(optional(','), $._value)), optional($.important)),
+
+    _custom_property_name: ($) =>
+      alias(token(prec(1, /--[a-zA-Z0-9-_\xA0-\xFF]*/)), $.property_name),
+
+    // Case-insensitive, and the bang may be followed by whitespace (`! important`).
+    important: (_) => token(prec(1, seq('!', /\s*/, /[iI][mM][pP][oO][rR][tT][aA][nN][tT]/))),
 
     // Media queries
 
@@ -260,11 +277,34 @@ export default grammar({
         $.binary_query,
         $.unary_query,
         $.selector_query,
+        $.range_query,
         $.parenthesized_query,
       ),
 
     feature_query: ($) =>
       seq('(', alias($.identifier, $.feature_name), ':', repeat1($._value), ')'),
+
+    // Range syntax: `(width >= 600px)`, `(400px <= width < 700px)`.
+    range_query: ($) =>
+      seq(
+        '(',
+        $._range_operand,
+        $._range_operator,
+        $._range_operand,
+        optional(seq($._range_operator, $._range_operand)),
+        ')',
+      ),
+
+    _range_operand: ($) =>
+      choice(
+        alias($.identifier, $.feature_name),
+        $.integer_value,
+        $.float_value,
+        $.call_expression,
+        seq($.integer_value, '/', $.integer_value), // A ratio such as `16/9`
+      ),
+
+    _range_operator: (_) => choice('<', '<=', '>', '>=', '='),
 
     parenthesized_query: ($) => seq('(', $._query, ')'),
 
@@ -331,7 +371,12 @@ export default grammar({
     call_expression: ($) =>
       seq(alias($.identifier, $.function_name), choice($.arguments, $.url_arguments)),
 
-    url_arguments: ($) => seq(token.immediate('('), alias($._unquoted_url, $.plain_value), ')'),
+    url_arguments: ($) =>
+      seq(
+        token.immediate('('),
+        alias(choice($._unquoted_url, $._fragment_url), $.plain_value),
+        ')',
+      ),
 
     binary_expression: ($) => prec.left(seq($._value, choice('+', '-', '*', '/'), $._value)),
 
@@ -354,17 +399,20 @@ export default grammar({
     _unquoted_url: (_) =>
       token(choice(/\/[^\s'\")]*/, /\.[^\s'\")0-9][^\s'\")]*/, /\.\d[^\s'\")]*\/[^\s'\")]*/)),
 
+    // A fragment reference such as `url(#clip)`. Every call may take url arguments, so this token
+    // is a candidate after the `(` of any function. It must contain a character that is not a hex
+    // digit, which keeps a color opening a function (`linear-gradient(#fff, #000)`) a color.
+    _fragment_url: (_) => token(/#[0-9a-fA-F]*[^0-9a-fA-F\s'\",)][^\s'\",)]*/),
+
     comment: (_) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
+    // A value never starts with a slash, so `//old` is rejected where strict CSS rejects line
+    // comments. A slash inside a word stays allowed, which keeps unquoted URLs such as
+    // `url(https://example.com/a//b.png)` and base64 data URIs whole.
     plain_value: (_) =>
       token(
         seq(
-          repeat(
-            choice(
-              /[-_]/,
-              /\/[^\*\s,;!{}()\[\]]/, // Slash not followed by a '*' (which would be a comment)
-            ),
-          ),
+          repeat(/[-_]/),
           /[a-zA-Z]/,
           repeat(
             choice(

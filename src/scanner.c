@@ -120,12 +120,21 @@ bool tree_sitter_css_strict_external_scanner_scan(void *payload, TSLexer *lexer,
             // We need a `{` to be a pseudo class selector, a `;` indicates a property.
             // This does not apply if we're in a comment, however.
             bool in_comment = false;
-            if (after_whitespace && lexer->lookahead == '/') {
-                // Whitespace was already consumed above, so the comment opener sits under
-                // the cursor instead of one step ahead, where the loop below expects it.
+            if (lexer->lookahead == '/') {
+                // Any whitespace was already consumed above, so a comment opener sits under the
+                // cursor instead of one step ahead, where the loop below expects it. That holds
+                // with or without whitespace after the colon.
                 advance(lexer);
+                if (lexer->lookahead == '/') {
+                    // `//*`: the loop below steps over this second slash untested, so look past
+                    // it here for the comment opener, as the loop does for a slash it reaches.
+                    advance(lexer);
+                }
                 if (lexer->lookahead == '*') {
                     in_comment = true;
+                } else if (lexer->lookahead == '{') {
+                    // The loop below steps over the current character before testing it.
+                    return true;
                 }
             }
             while (lexer->lookahead != ';' && lexer->lookahead != '}' && !lexer->eof(lexer)) {
