@@ -219,8 +219,8 @@ export default grammar({
         ),
       ),
 
-    // An+B notation for `nth-child`/`nth-last-child`.
-    _nth_functional_notation: (_) => /-?(\d)*n\s*(\+\s*\d+)?/,
+    // An+B notation for `nth-child`/`nth-last-child`: an optional sign on A, and a signed B.
+    _nth_functional_notation: (_) => /[-+]?\d*n\s*([-+]\s*\d+)?/,
 
     pseudo_element_arguments: ($) =>
       seq(token.immediate('('), sep(',', choice($._selector, repeat1($._value))), ')'),
@@ -331,7 +331,12 @@ export default grammar({
     call_expression: ($) =>
       seq(alias($.identifier, $.function_name), choice($.arguments, $.url_arguments)),
 
-    url_arguments: ($) => seq(token.immediate('('), alias($._unquoted_url, $.plain_value), ')'),
+    url_arguments: ($) =>
+      seq(
+        token.immediate('('),
+        alias(choice($._unquoted_url, $._fragment_url), $.plain_value),
+        ')',
+      ),
 
     binary_expression: ($) => prec.left(seq($._value, choice('+', '-', '*', '/'), $._value)),
 
@@ -354,17 +359,20 @@ export default grammar({
     _unquoted_url: (_) =>
       token(choice(/\/[^\s'\")]*/, /\.[^\s'\")0-9][^\s'\")]*/, /\.\d[^\s'\")]*\/[^\s'\")]*/)),
 
+    // A fragment reference such as `url(#clip)`. Every call may take url arguments, so this token
+    // is a candidate after the `(` of any function. It must contain a character that is not a hex
+    // digit, which keeps a color opening a function (`linear-gradient(#fff, #000)`) a color.
+    _fragment_url: (_) => token(/#[0-9a-fA-F]*[^0-9a-fA-F\s'\",)][^\s'\",)]*/),
+
     comment: (_) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
+    // A value never starts with a slash, so `//old` is rejected where strict CSS rejects line
+    // comments. A slash inside a word stays allowed, which keeps unquoted URLs such as
+    // `url(https://example.com/a//b.png)` and base64 data URIs whole.
     plain_value: (_) =>
       token(
         seq(
-          repeat(
-            choice(
-              /[-_]/,
-              /\/[^\*\s,;!{}()\[\]]/, // Slash not followed by a '*' (which would be a comment)
-            ),
-          ),
+          repeat(/[-_]/),
           /[a-zA-Z]/,
           repeat(
             choice(
