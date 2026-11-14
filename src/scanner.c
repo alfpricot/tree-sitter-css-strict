@@ -125,6 +125,11 @@ bool tree_sitter_css_strict_external_scanner_scan(void *payload, TSLexer *lexer,
                 // cursor instead of one step ahead, where the loop below expects it. That holds
                 // with or without whitespace after the colon.
                 advance(lexer);
+                if (lexer->lookahead == '/') {
+                    // `//*`: the loop below steps over this second slash untested, so look past
+                    // it here for the comment opener, as the loop does for a slash it reaches.
+                    advance(lexer);
+                }
                 if (lexer->lookahead == '*') {
                     in_comment = true;
                 } else if (lexer->lookahead == '{') {
