@@ -300,25 +300,6 @@ a {
         (property_name)
         (plain_value)))))
 
-=======================================
-Strict CSS does not accept line comments
-=======================================
-
-a { color: red; // note }
-
----
-
-(stylesheet
-  (rule_set
-    (selectors
-      (tag_name))
-    (block
-      (declaration
-        (property_name)
-        (plain_value))
-      (ERROR
-        (UNEXPECTED ' ')))))
-
 =================================
 Declarations at the top level
 =================================

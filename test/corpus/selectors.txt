@@ -284,7 +284,7 @@ a:not([href]) {}
 :nth-last-child(-n) {}
 :nth-last-child(2n+1) {}
 :nth-child(2n + 2) {}
-:nth-last-child(-n) {}
+:nth-last-child(2n-1) {}
 :nth-child(2n of a.external) {}
 ---
 
@@ -334,6 +334,46 @@ a:not([href]) {}
             (tag_name)
             (class_name
               (identifier))))))
+    (block)))
+
+======================================================
+An+B arguments with signs and spaces around the offset
+======================================================
+
+:nth-child(3n - 2) {}
+:nth-child(+n) {}
+:nth-child(+2n+1) {}
+:nth-last-child(-2n - 3) {}
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (pseudo_class_selector
+        (class_name)
+        (arguments
+          (plain_value))))
+    (block))
+  (rule_set
+    (selectors
+      (pseudo_class_selector
+        (class_name)
+        (arguments
+          (plain_value))))
+    (block))
+  (rule_set
+    (selectors
+      (pseudo_class_selector
+        (class_name)
+        (arguments
+          (plain_value))))
+    (block))
+  (rule_set
+    (selectors
+      (pseudo_class_selector
+        (class_name)
+        (arguments
+          (plain_value))))
     (block)))
 
 =========================

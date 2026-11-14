@@ -219,8 +219,8 @@ export default grammar({
         ),
       ),
 
-    // An+B notation for `nth-child`/`nth-last-child`.
-    _nth_functional_notation: (_) => /-?(\d)*n\s*(\+\s*\d+)?/,
+    // An+B notation for `nth-child`/`nth-last-child`: an optional sign on A, and a signed B.
+    _nth_functional_notation: (_) => /[-+]?\d*n\s*([-+]\s*\d+)?/,
 
     pseudo_element_arguments: ($) =>
       seq(token.immediate('('), sep(',', choice($._selector, repeat1($._value))), ')'),
@@ -352,24 +352,30 @@ export default grammar({
     // (`url(.5x/bg.png)`); without one no alternative matches there and the
     // float is the only token left to take the position.
     _unquoted_url: (_) =>
-      token(choice(/\/[^\s'\")]*/, /\.[^\s'\")0-9][^\s'\")]*/, /\.\d[^\s'\")]*\/[^\s'\")]*/)),
+      token(
+        choice(
+          /\/[^\s'\")]*/,
+          /#[^\s'\")]*/,
+          /\.[^\s'\")0-9][^\s'\")]*/,
+          /\.\d[^\s'\")]*\/[^\s'\")]*/,
+        ),
+      ),
 
     comment: (_) => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
+    // A slash inside a word is allowed unless it starts a comment (`/*`) or a line comment (`//`),
+    // which strict CSS rejects. The one place `//` is kept is directly after a scheme's colon, so
+    // unquoted absolute URLs such as `url(https://example.com/a.png)` still parse.
     plain_value: (_) =>
       token(
         seq(
-          repeat(
-            choice(
-              /[-_]/,
-              /\/[^\*\s,;!{}()\[\]]/, // Slash not followed by a '*' (which would be a comment)
-            ),
-          ),
+          repeat(/[-_]/),
           /[a-zA-Z]/,
           repeat(
             choice(
               /[^/\s,;!{}()\[\]]/, // Not a slash, not a delimiter character
-              /\/[^\*\s,;!{}()\[\]]/, // Slash not followed by a '*' (which would be a comment)
+              /\/[^\*\/\s,;!{}()\[\]]/, // Slash not followed by '*' or '/'
+              seq(':', '//', /[^\*\/\s,;!{}()\[\]]/), // The `//` after a scheme's colon
             ),
           ),
         ),

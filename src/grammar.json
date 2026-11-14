@@ -1386,7 +1386,7 @@
     },
     "_nth_functional_notation": {
       "type": "PATTERN",
-      "value": "-?(\\d)*n\\s*(\\+\\s*\\d+)?"
+      "value": "[-+]?\\d*n\\s*([-+]\\s*\\d+)?"
     },
     "pseudo_element_arguments": {
       "type": "SEQ",
@@ -2372,6 +2372,10 @@
           },
           {
             "type": "PATTERN",
+            "value": "#[^\\s'\\\")]*"
+          },
+          {
+            "type": "PATTERN",
             "value": "\\.[^\\s'\\\")0-9][^\\s'\\\")]*"
           },
           {
@@ -2409,17 +2413,8 @@
           {
             "type": "REPEAT",
             "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "PATTERN",
-                  "value": "[-_]"
-                },
-                {
-                  "type": "PATTERN",
-                  "value": "\\/[^\\*\\s,;!{}()\\[\\]]"
-                }
-              ]
+              "type": "PATTERN",
+              "value": "[-_]"
             }
           },
           {
@@ -2437,7 +2432,24 @@
                 },
                 {
                   "type": "PATTERN",
-                  "value": "\\/[^\\*\\s,;!{}()\\[\\]]"
+                  "value": "\\/[^\\*\\/\\s,;!{}()\\[\\]]"
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ":"
+                    },
+                    {
+                      "type": "STRING",
+                      "value": "//"
+                    },
+                    {
+                      "type": "PATTERN",
+                      "value": "[^\\*\\/\\s,;!{}()\\[\\]]"
+                    }
+                  ]
                 }
               ]
             }
