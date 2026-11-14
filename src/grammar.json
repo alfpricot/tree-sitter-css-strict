@@ -2200,8 +2200,17 @@
         {
           "type": "ALIAS",
           "content": {
-            "type": "SYMBOL",
-            "name": "_unquoted_url"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_unquoted_url"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_fragment_url"
+              }
+            ]
           },
           "named": true,
           "value": "plain_value"
@@ -2372,10 +2381,6 @@
           },
           {
             "type": "PATTERN",
-            "value": "#[^\\s'\\\")]*"
-          },
-          {
-            "type": "PATTERN",
             "value": "\\.[^\\s'\\\")0-9][^\\s'\\\")]*"
           },
           {
@@ -2383,6 +2388,13 @@
             "value": "\\.\\d[^\\s'\\\")]*\\/[^\\s'\\\")]*"
           }
         ]
+      }
+    },
+    "_fragment_url": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "#[0-9a-fA-F]*[^0-9a-fA-F\\s'\\\",)][^\\s'\\\",)]*"
       }
     },
     "comment": {
@@ -2432,24 +2444,7 @@
                 },
                 {
                   "type": "PATTERN",
-                  "value": "\\/[^\\*\\/\\s,;!{}()\\[\\]]"
-                },
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ":"
-                    },
-                    {
-                      "type": "STRING",
-                      "value": "//"
-                    },
-                    {
-                      "type": "PATTERN",
-                      "value": "[^\\*\\/\\s,;!{}()\\[\\]]"
-                    }
-                  ]
+                  "value": "\\/[^\\*\\s,;!{}()\\[\\]]"
                 }
               ]
             }

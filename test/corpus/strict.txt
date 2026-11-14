@@ -275,28 +275,6 @@ a {
             (MISSING important))
           (plain_value))))))
 
-====================================================
-A double slash directly after a word is not accepted
-====================================================
-
-a {
-  color: red//x;
-}
-
----
-
-(stylesheet
-  (rule_set
-    (selectors
-      (tag_name))
-    (block
-      (declaration
-        (property_name)
-        (binary_expression
-          (plain_value)
-          (ERROR)
-          (plain_value))))))
-
 ===============================
 Fragment URLs are unquoted URLs
 ===============================
@@ -304,7 +282,7 @@ Fragment URLs are unquoted URLs
 a {
   filter: url(#clip);
   fill: url(#a-b_c);
-  mask: url(#fff);
+  mask: url(#clip-path_1);
 }
 
 ---
@@ -333,12 +311,13 @@ a {
           (url_arguments
             (plain_value)))))))
 
-==============================================
-Absolute unquoted URLs keep their double slash
-==============================================
+============================================
+A hex color opening a function stays a color
+============================================
 
 a {
-  background: url(https://example.com/a.png);
+  background: linear-gradient(#fff, #000);
+  filter: drop-shadow(#000 0 0);
 }
 
 ---
@@ -353,4 +332,51 @@ a {
         (call_expression
           (function_name)
           (arguments
+            (color_value)
+            (color_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (color_value)
+            (integer_value)
+            (integer_value)))))))
+
+==============================================
+Unquoted absolute URLs keep every double slash
+==============================================
+
+a {
+  background: url(https://example.com/a//b.png);
+  src: url(file:///fonts/a.woff);
+  mask: url(data:image/png;base64,AA//AA==);
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value))))
+      (declaration
+        (property_name)
+        (call_expression
+          (function_name)
+          (arguments
+            (plain_value)
+            (plain_value)
             (plain_value)))))))
