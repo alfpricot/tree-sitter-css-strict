@@ -462,3 +462,61 @@ Comments in declarations
         (property_name)
         (comment)
         (plain_value)))))
+
+=========================================
+Important with whitespace and in any case
+=========================================
+
+a {
+  b: c ! important;
+  d: e !IMPORTANT;
+  f: g !Important;
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name)
+        (plain_value)
+        (important))
+      (declaration
+        (property_name)
+        (plain_value)
+        (important))
+      (declaration
+        (property_name)
+        (plain_value)
+        (important)))))
+
+=====================================
+Custom properties with an empty value
+=====================================
+
+a {
+  --x: ;
+  --y:;
+  --z: 1;
+  --w:
+}
+
+---
+
+(stylesheet
+  (rule_set
+    (selectors
+      (tag_name))
+    (block
+      (declaration
+        (property_name))
+      (declaration
+        (property_name))
+      (declaration
+        (property_name)
+        (integer_value))
+      (declaration
+        (property_name)))))
